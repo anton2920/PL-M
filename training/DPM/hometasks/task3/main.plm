@@ -1,0 +1,12 @@
+main: DO;
+$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+	DECLARE a WORD, i BYTE;
+
+	DO i = 0 TO 10;
+		a = ((Rand MOD (999-100+1)) + 100) / 10 * 10;
+		CALL dos_std_string_out(@('Random number that ends with zero = $')); CALL PrintWord(a); CALL Println;
+	END;
+
+	CALL dos_exit(0);
+END main;

@@ -1,0 +1,38 @@
+main: DO;
+$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+	DigitsSum: PROCEDURE(n) WORD;
+		DECLARE (n, sum) WORD;
+
+		sum = 0;
+		DO WHILE n > 0;
+			sum = sum + n MOD 10;
+			n = n / 10;
+		END;
+
+		RETURN sum;
+	END DigitsSum;
+
+	DigitsProd: PROCEDURE(n) WORD;
+		DECLARE (n, prod) WORD;
+
+		prod = 1;
+		DO WHILE n > 0;
+			prod = prod * (n MOD 10);
+			n = n / 10;
+		END;
+
+		RETURN prod;
+	END DigitsProd;
+
+	DECLARE a WORD, i BYTE;
+	DO i = 0 to 10;
+		a = (Rand MOD (999-100+1)) + 100;
+		CALL dos_std_string_out(@('Generated number = $')); CALL PrintWord(a);
+		CALL dos_std_string_out(@(', sum of digits = $'));  CALL PrintWord(DigitsSum(a));
+		CALL dos_std_string_out(@(', prod of digits = $')); CALL PrintWord(DigitsProd(a));
+		CALL Println;
+	END;
+
+	CALL dos_exit(0);
+END main;

@@ -1,0 +1,53 @@
+main: DO;
+$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+	part1: DO;
+		DECLARE i BYTE, letters(2) BYTE, between WORD;
+
+		CALL dos_std_string_out(@('==== PART 1 ====$')); CALL Println;
+		CALL dos_std_string_out(@('Type first char: $'));
+		letters(0) = ReadChar;
+
+		CALL dos_std_string_out(@('Type second char: $'));
+		letters(1) = ReadChar;
+
+		DO i = 0 TO LAST(letters);
+			CALL dos_std_string_out(@('Letter ''$'));
+			CALL dos_std_out(letters(i));
+			CALL dos_std_string_out(@(''' position = $'));
+			CALL PrintWord(letters(i)-'a'+1);
+			CALL Println;
+		END;
+
+		between = UNSIGN(IABS(SIGNED(letters(1))-SIGNED(letters(0)))) - 1;
+		IF between = 0 THEN
+			CALL dos_std_string_out(@('There are not characters in between!$'));
+		ELSE DO;
+			CALL dos_std_string_out(@('Number of letters in between: $'));
+			CALL PrintWord(between);
+		END;
+		CALL Println;
+	END;
+
+	part2: DO;
+		DECLARE pos WORD, letter BYTE;
+
+		CALL dos_std_string_out(@('==== PART 2 ====$')); CALL Println;
+		CALL dos_std_string_out(@('Type letter position: $'));
+		pos = ReadWord;
+		letter = 'a' + pos - 1;
+
+		IF NOT ((letter >= 'a') AND (letter <= 'z')) THEN
+			CALL dos_std_string_out(@('There is no letter at this position!$'));
+		ELSE DO;
+			CALL dos_std_string_out(@('Letter at position $'));
+			CALL PrintWord(pos);
+			CALL dos_std_string_out(@(' is ''$'));
+			CALL dos_std_out(letter);
+			CALL dos_std_out('''');
+		END;
+		CALL Println;
+	END;
+
+	CALL dos_exit(0);
+END main;

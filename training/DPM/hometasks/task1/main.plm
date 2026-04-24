@@ -1,0 +1,20 @@
+main: DO;
+$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+	DECLARE (a, b, tmp) WORD;
+
+	CALL dos_std_string_out(@('Type fst var: $'));
+	a = ReadWord;
+
+	CALL dos_std_string_out(@('Type snd var: $'));
+	b = ReadWord;
+
+	CALL dos_std_string_out(@('Fst var = $')); CALL PrintWord(a); CALL Println;
+	CALL dos_std_string_out(@('Snd var = $')); CALL PrintWord(b); CALL Println;	
+
+	tmp = a; a = b;	b = tmp;
+	CALL dos_std_string_out(@('Fst var = $')); CALL PrintWord(a); CALL Println;
+	CALL dos_std_string_out(@('Snd var = $')); CALL PrintWord(b); CALL Println;
+
+	CALL dos_exit(0);
+END main;
