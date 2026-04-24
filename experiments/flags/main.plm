@@ -1,0 +1,26 @@
+main: DO;
+$INCLUDE('..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\home\libs\lib.inc')
+	DECLARE number BYTE;
+
+	number = 255;
+	/* NOTE(anton2920): I cannot write 'number = number + 1;' because it
+	 * generates 'INC' instruction which is like one thing in the world
+	 * that DOES NOT affect the 'carry flag' that is being tested later.
+	 */
+	number = number + 2;
+
+	IF NOT CARRY THEN
+		CALL dos_std_string_out(@('No carry or borrow was observed$'));
+	ELSE DO;
+		CALL dos_std_string_out(@('Carry or borrow observed!$'));
+		CALL dos_std_string_out(@('Can your C do that? I don''t f**cking think so!$'));
+	END;
+	CALL Println;
+
+	call dos_std_string_out(@('The resuling number is $'));
+	call PrintWord(number);
+	call Println;
+
+	CALL dos_exit(0);
+END main;
