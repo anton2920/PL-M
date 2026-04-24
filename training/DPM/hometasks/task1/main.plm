@@ -1,6 +1,6 @@
 main: DO;
-$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
-$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
 	DECLARE (a, b, tmp) WORD;
 
 	CALL dos_std_string_out(@('Type fst var: $'));

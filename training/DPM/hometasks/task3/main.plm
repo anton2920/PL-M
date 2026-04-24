@@ -1,6 +1,6 @@
 main: DO;
-$INCLUDE('C:\Dist\Intel\Sample\doslibs.inc')
-$INCLUDE('C:\Dist\PL-M\home\libs\lib.inc')
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
 	DECLARE a WORD, i BYTE;
 
 	DO i = 0 TO 10;
