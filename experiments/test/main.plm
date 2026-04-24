@@ -1,0 +1,43 @@
+main: DO;
+$INCLUDE('..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\home\libs\lib.inc')
+	Min: PROCEDURE(a, b) WORD;
+		DECLARE (a, b) WORD;
+		IF a < b THEN RETURN a;
+		ELSE RETURN b;
+	END Min;
+
+	DECLARE s1(*) BYTE INITIAL('The quick brown fox jumps over a lazy dog!$');
+	DECLARE s2(100) BYTE;
+	DECLARE (i, res) WORD;
+
+	s2(0) = '$';
+	CALL dos_std_string_out(@('Before copy: $'));
+	CALL dos_std_string_out(@s2);
+	CALL Println;
+
+	CALL MOVB(@s1, @s2, Min(LENGTH(s1), LENGTH(s2)));
+
+	CALL dos_std_string_out(@('After copy: $'));
+	CALL dos_std_string_out(@s2);
+	CALL Println;
+
+	res = CMPB(@s1, @s2, Min(LENGTH(s1), LENGTH(s2)));
+	IF INT(res) = -1 THEN
+		CALL dos_std_string_out(@('Two strings are identical!$'));
+	ELSE DO;
+		CALL dos_std_string_out(@('Two strings are different, and the first position is $'));
+		CALL PrintWord(res);
+	END;
+	CALL Println;
+	
+	res = DEC(res);
+
+	CALL dos_std_string_out(@('Before one second delay...$')); CALL Println;
+	DO i = 1 TO 40;
+		CALL TIME(250);
+	END;
+	CALL dos_std_string_out(@('After one second delay!$')); CALL Println;
+
+	CALL dos_exit(0);
+END main;
