@@ -16,7 +16,7 @@ $INCLUDE('..\..\..\..\home\libs\lib.inc')
 		DO j = i + 1 TO LAST(numbers);
 			IF numbers(i) = numbers(j) THEN DO;
 				CALL dos_std_string_out(@('You have identical numbers!', 13, 10, '$'));
-				GOTO error;
+				GO TO error;
 			END;
 		END;
 	END;

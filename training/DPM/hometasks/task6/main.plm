@@ -2,7 +2,7 @@ main: DO;
 $INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
 $INCLUDE('..\..\..\..\home\libs\lib.inc')
 	DECLARE numbers(3) WORD, (max, i) WORD;
-	
+
 	DO i = 0 TO LAST(numbers);
 		CALL dos_std_string_out(@('Type a number: $'));
 		numbers(i) = ReadWord;
