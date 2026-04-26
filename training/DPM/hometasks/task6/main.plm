@@ -1,0 +1,25 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE numbers(3) WORD, (max, i) WORD;
+	
+	DO i = 0 TO LAST(numbers);
+		CALL dos_std_string_out(@('Type a number: $'));
+		numbers(i) = ReadWord;
+	END;
+
+	max = numbers(0);
+	DO i = 1 TO LAST(numbers);
+		IF numbers(i) > max THEN max = numbers(i);
+	END;
+
+	CALL dos_std_string_out(@('Your numbers:$'));
+	DO i = 0 TO LAST(numbers);
+		CALL dos_std_out(' ');
+		CALL PrintWord(numbers(i));
+	END;
+	CALL Println;
+
+	CALL dos_std_string_out(@('Maximum: $')); CALL PrintWord(max); CALL Println;
+	CALL dos_exit(0);
+END main;

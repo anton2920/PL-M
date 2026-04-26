@@ -1,0 +1,30 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE numbers(3) WORD, sum WORD;
+	DECLARE hasEquals BYTE;
+	DECLARE (i, j) WORD;
+
+	sum = 0;
+	DO i = 0 TO LAST(numbers);
+		CALL dos_std_string_out(@('Type a number: $'));
+		numbers(i) = ReadWord;
+		sum = sum + numbers(i);
+	END;
+
+	DO i = 0 TO LAST(numbers);
+		DO j = i + 1 TO LAST(numbers);
+			IF numbers(i) = numbers(j) THEN DO;
+				CALL dos_std_string_out(@('You have identical numbers!', 13, 10, '$'));
+				GOTO error;
+			END;
+		END;
+	END;
+
+	CALL dos_std_string_out(@('Arithmetic mean: $'));
+	CALL PrintWord(sum / LENGTH(numbers));
+	CALL Println;
+
+error:
+	CALL dos_exit(0);
+END main;

@@ -1,6 +1,6 @@
 @echo off
 
-set INST=C:\Dist\PLM\Intel
+set INST=C:\Intel
 set PATH=%PATH%;%INST%;%INST%\Sample
 
 PLM86 main.plm NOTYPE NOLIST OPTIMIZE(3)

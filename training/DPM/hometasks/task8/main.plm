@@ -1,0 +1,24 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE numbers(2) WORD;
+	DECLARE odd WORD;
+	DECLARE i WORD;
+	
+	odd = 0;
+	DO i = 0 TO LAST(numbers);
+		CALL dos_std_string_out(@('Type a number: $'));
+		numbers(i) = ReadWord;
+		IF (odd = 0) AND (numbers(i) AND 1 = 1) THEN odd = numbers(i);
+	END;
+
+	IF odd = 0 THEN
+		CALL dos_std_string_out(@('There are no odd numbers!$'));
+	ELSE DO;
+		CALL dos_std_string_out(@('The odd number is $'));
+		CALL PrintWord(odd);
+	END;
+	CALL Println;
+
+	CALL dos_exit(0);
+END main;
