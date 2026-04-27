@@ -1,0 +1,39 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE pts(2) STRUCTURE (x REAL, y REAL);
+	DECLARE eps REAL DATA(1.e-6);
+	DECLARE (k, b) REAL;
+	DECLARE i BYTE;
+
+	CALL INIT$REAL$MATH$UNIT;
+	CALL SET$REAL$MODE(0FFFH);
+
+	DO i = 0 TO LAST(pts);
+		CALL dos_std_string_out(@('Type x$'));
+		CALL PrintWord(DOUBLE(i));
+		CALL dos_std_string_out(@(': $'));
+		pts(i).x = ReadReal;
+
+		CALL dos_std_string_out(@('Type y$'));
+		CALL PrintWord(DOUBLE(i));
+		CALL dos_std_string_out(@(': $'));
+		pts(i).y = ReadReal;
+	END;
+
+	k = (pts(1).y - pts(0).y) / (pts(1).x - pts(0).x);
+	b = (pts(1).x*pts(0).y - pts(0).x*pts(1).y) / (pts(1).x - pts(0).x);
+
+	CALL dos_std_string_out(@('Line equation: y = $'));
+	IF ABS(k) - 1. > eps THEN CALL PrintReal(k);
+	IF k + 1. < eps THEN CALL dos_std_out('-');
+	CALL dos_std_string_out(@('x$'));
+	IF ABS(b) > eps THEN DO;
+		IF b > 0. THEN CALL dos_std_string_out(@(' + $'));
+		          ELSE CALL dos_std_string_out(@(' - $'));
+		CALL PrintReal(ABS(b));
+	END;
+	CALL Println;
+
+	CALL dos_exit(0);
+END main;

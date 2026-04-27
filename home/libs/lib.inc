@@ -38,9 +38,9 @@ PrintInt: PROCEDURE(n);
 END PrintInt;
 
 PrintReal: PROCEDURE(x);
-	DECLARE x REAL, ix INTEGER;
 	DECLARE eps REAL DATA(1.e-6);
-	DECLARE i WORD;
+	DECLARE x REAL, ix INTEGER;
+	DECLARE i BYTE;
 
 	IF x < 0. THEN DO;
 		x = ABS(x);
@@ -77,19 +77,68 @@ ReadChar: PROCEDURE BYTE;
 	RETURN buf.chars(0);
 END ReadChar;
 
-ReadWord: PROCEDURE WORD;
-	DECLARE n WORD, (i, c) BYTE;
-	DECLARE buf STRUCTURE (req BYTE, read BYTE, chars(20) BYTE, cr BYTE);
+DECLARE _READBODY LITERALLY '
+	DECLARE buf STRUCTURE (req BYTE, read BYTE, chars(21) BYTE, cr BYTE);
+	DECLARE (i, c) BYTE, sign INTEGER;
 
-	buf.req = 20;
+	buf.req = LENGTH(buf.chars);
 	CALL dos_buffered_std_in(@buf); CALL Println;
 
-	n = 0;
+	sign = 1; n = 0;
 	DO i = 0 TO buf.read;
 		c = buf.chars(i);
-		IF (c >= '0') AND (c <= '9') THEN n = n * 10 + c - '0';
+		IF (i = 0) AND (c = ''-'') THEN sign = -1;
+		IF (c >= ''0'') AND (c <= ''9'') THEN n = n * 10 + cc - ''0'';
+	END;
+';
+
+ReadDword: PROCEDURE DWORD;
+	DECLARE cc LITERALLY 'c';
+	DECLARE n DWORD;
+	_READBODY;
+	RETURN n;
+END ReadDword;
+
+ReadInt: PROCEDURE INTEGER;
+	DECLARE cc LITERALLY 'INT(c)';
+	DECLARE n INTEGER;
+	_READBODY;
+	RETURN sign * n;
+END ReadInt;
+
+ReadReal: PROCEDURE REAL;
+	DECLARE buf STRUCTURE (req BYTE, read BYTE, chars(21) BYTE, cr BYTE);
+	DECLARE (i, c, state, power) BYTE, sign INTEGER;
+	DECLARE (num, denum) REAL;
+
+	buf.req = LENGTH(buf.chars);
+	CALL dos_buffered_std_in(@buf); CALL Println;
+
+	state = power = 0; sign = 1; num = 0.; denum = 0.;
+	DO i = 0 TO buf.read;
+		c = buf.chars(i);
+		IF (i = 0) AND (c = '-') THEN sign = -1;
+		IF (c = '.') THEN DO;
+			power = buf.read - i;
+			state = 1;
+		END;
+		IF (c >= '0') AND (c <= '9') THEN DO CASE state;
+			/* case 0: */ num   = num   * 10. + FLOAT(INT(c - '0'));
+			/* case 1: */ denum = denum * 10. + FLOAT(INT(c - '0'));
+		END;
 	END;
 
+	DO i = 1 TO power-1;
+		denum = denum / 10.;
+	END;
+
+	RETURN FLOAT(sign) * (num + denum);
+END ReadReal;
+
+ReadWord: PROCEDURE WORD;
+	DECLARE cc LITERALLY 'c';
+	DECLARE n WORD;
+	_READBODY;
 	RETURN n;
 END ReadWord;
 
