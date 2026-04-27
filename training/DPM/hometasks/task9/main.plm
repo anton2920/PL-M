@@ -1,0 +1,42 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	Swap: PROCEDURE(pa, pb);
+		DECLARE (pa, pb) POINTER;
+		DECLARE a BASED pa INTEGER, b BASED pb INTEGER;
+		DECLARE tmp INTEGER;
+
+		tmp = a;
+		a = b;
+		b = tmp;
+	END Swap;
+
+	DECLARE (a, b) INTEGER;
+
+	CALL dos_std_string_out(@('Type first number: $'));
+	a = ReadInt;
+
+	CALL dos_std_string_out(@('Type second number: $'));
+	b = ReadInt;
+
+	IF b > a THEN CALL Swap(@a, @b);
+
+	IF a MOD b = 0 THEN DO;
+		CALL dos_std_out('''');
+		CALL PrintInt(a);
+		CALL dos_std_string_out(@(''' is evenly divisible by ''$'));
+		CALL PrintInt(b);
+		CALL dos_std_out('''');
+	END; ELSE DO;
+		CALL dos_std_out('''');
+		CALL PrintInt(a);
+		CALL dos_std_string_out(@(''' is not evenly divisible by ''$'));
+		CALL PrintInt(b);
+		CALL dos_std_string_out(@(''' (remainder is ''$'));
+		CALL PrintInt(a MOD b);
+		CALL dos_std_string_out(@(''')$'));
+	END;
+	CALL Println;
+
+	CALL dos_exit(0);
+END main;
