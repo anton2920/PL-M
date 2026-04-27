@@ -1,0 +1,45 @@
+main: DO;
+$INCLUDE('..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\home\libs\lib.inc')
+	DECLARE (n, i) WORD, fact DWORD;
+
+	DECLARE xi DWORD;
+	DECLARE xf REAL AT (@xi);
+	
+	DECLARE a WORD;
+	DECLARE ra WORD AT (@a);
+
+	DECLARE vgaBuffer(1) WORD AT(0b8000h);
+
+	/* var bytes [5]byte */
+	DECLARE var LITERALLY 'DECLARE';
+	var bytes (5)byte initial(1, 2, 3, 4, 5);
+
+	CALL InitRealMathUnit;
+	CALL SetRealMode(0FFFh);
+
+	xi = 3fc00000h;
+	CALL PrintReal(xf); CALL Println;
+
+	ra = 123;
+	CALL PrintWord(a); CALL Println;
+
+	CALL dos_std_string_out(@('Hello, Twitch, YouTube and Kick!', 13, 10, '$'));
+	
+	CALL dos_std_string_out(@('Type n: $'));
+	n = ReadWord;
+
+	fact = 1;
+	DO i = 2 TO n;
+		fact = fact * i;
+	END;
+
+	CALL PrintWord(n);
+	CALL dos_std_string_out(@('! = $'));
+	CALL PrintDword(fact);
+	CALL Println;
+
+	vgaBuffer(0) = 0F000h OR 'B';
+
+	CALL dos_exit(0);
+END main;
