@@ -1,0 +1,69 @@
+                Welcome to the DB86 Software Debugger
+
+    In this package, you'll find the DB86 software debugger, the
+    tool package, and an example program.
+
+    The tool package includes:
+      *  The Make program, for automating program maintenance
+      *  The Touch program, used with Make
+      *  A DB86 utility allowing source files (rather than
+            list files) to be used during debug sessions
+      *  A documentation file for each of these utilities
+
+    To use the tool package, start in DOS and change to (or create
+    and then change to) the directory in which you want the DB86
+    utilities to reside; it may be desirable for these tools to
+    reside in a readily-accessible directory in the current path.
+    Invoke the tool package (toolpack.exe) directly from the DB86
+    disk by typing a:toolpack (assuming the tool diskette is in
+    drive A:).  Note that when the program executes, it will
+    recreate all its files in the current directory.  The
+    following files will now appear in your directory; make sure
+    that you don't have existing files with the same names in this
+    directory, or they will be overwritten:
+
+         File              Function
+         ----              --------
+         make.exe          Program maintainer
+         make.doc          Documentation for Make
+         touch.exe         File time update utility
+         touch.doc         Documentation for Touch
+         consrc.exe        DB86 source file utility
+         consrc.doc        Documentation for Consrc
+
+    The example program gives you the opportunity to see how
+    DB86 works:  you can take part in an actual debug session
+    and find a bug.  For information on the example program,
+    refer to Chapter 2 in the DB86 User's Guide.  Or just run
+    the executable version of the example program, with
+    explanatory screens, by typing a:example at the DOS prompt.
+
+    To  run the example program, first start in DOS and copy DB86
+    and the example files to any desired directory.  Then begin a
+    sample  debug session  by invoking  the tryit.bat  file: just
+    type  tryit at the DOS prompt.   The batch file automatically
+    invokes  DB86, loads the  example program, and  executes a GO
+    command  to the MAIN function.  Now see if you can locate the
+    bug in the hex memory dump routines!
+
+    The following files are used for the example program:
+    
+         File               Function
+         ----               --------
+         example.exe        Executable version of the example
+                            program
+         example.86         DB86-loadable version of example
+                            program
+         example.mac        Example program macro file
+         blimp.c            Example program source file
+         exampio.c          Example program source file
+         info.c             Example program source file
+         menu.c             Example program source file
+         tryit.bat          Invocation batch file for
+                            example program
+
+    If your version of DB86 comes on 5 1/4-inch disks, DB86 and
+    help and error files are on the disk labelled Disk 1 of 2,
+    and the tool package and example program are on the disk
+    labelled Disk 2 of 2.  If your version of DB86 comes on a 3
+    1/2-inch disk, all files are on that disk.
