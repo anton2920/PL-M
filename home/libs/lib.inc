@@ -1,3 +1,13 @@
+DECLARE ProgramSegmentPrefix LITERALLY 'STRUCTURE (
+	skip1    (2)BYTE,
+	topOfMem    WORD,
+	skip2  (28h)BYTE,
+	envs    SELECTOR,
+	skip3  (52h)BYTE,
+	argLen      BYTE,
+	argBuf (127)BYTE
+)';
+
 /* NOTE(anton2920): this exceeds theoretical limit on string constants by 56 (311 vs. 255). */
 DECLARE _PRINTBODY LITERALLY '
 	DECLARE (i, count) BYTE, digits(20) BYTE;
@@ -17,6 +27,39 @@ DECLARE _PRINTBODY LITERALLY '
 		CALL dos_std_out(digits(i));
 	END
 ';
+
+DECLARE _PRINTHEXBODY LITERALLY '
+	DECLARE (hdigit, shift, i) BYTE;
+	shift = SIZE(n) * 8 - 4;
+
+	IF n = 0 THEN CALL dos_std_out(''0'');
+	ELSE DO i = 1 TO SIZE(n)*2;
+		hdigit = SHR(n, shift) AND 0FH;
+		IF (hdigit >= 0) AND (hdigit <= 9) THEN
+			CALL dos_std_out(hdigit + ''0'');
+		ELSE
+			CALL dos_std_out(hdigit - 10 + ''A'');
+		shift = shift - 4;
+	END;
+
+	CALL dos_std_out(''H'');
+';
+
+PrintByteHex: PROCEDURE(n);
+	DECLARE n BYTE;
+	_PRINTHEXBODY;
+END PrintByteHex;
+
+PrintWordHex: PROCEDURE(n);
+	DECLARE n WORD;
+	_PRINTHEXBODY;
+END PrintWordHex;
+
+PrintDwordHex: PROCEDURE(n);
+	DECLARE n DWORD;
+	_PRINTHEXBODY;
+END PrintDwordHex;
+
 
 PrintWord: PROCEDURE(n);
 	DECLARE n WORD;
@@ -106,6 +149,13 @@ ReadInt: PROCEDURE INTEGER;
 	RETURN sign * n;
 END ReadInt;
 
+ReadWord: PROCEDURE WORD;
+	DECLARE cc LITERALLY 'c';
+	DECLARE n WORD;
+	_READBODY;
+	RETURN n;
+END ReadWord;
+
 ReadReal: PROCEDURE REAL;
 	DECLARE buf STRUCTURE (req BYTE, read BYTE, chars(21) BYTE, cr BYTE);
 	DECLARE (i, c, state, power) BYTE, sign INTEGER;
@@ -135,13 +185,6 @@ ReadReal: PROCEDURE REAL;
 	RETURN FLOAT(sign) * (num + denum);
 END ReadReal;
 
-ReadWord: PROCEDURE WORD;
-	DECLARE cc LITERALLY 'c';
-	DECLARE n WORD;
-	_READBODY;
-	RETURN n;
-END ReadWord;
-
 DECLARE _seed WORD INITIAL(1);
 Srand: PROCEDURE(seed);
 	DECLARE seed WORD;
@@ -153,3 +196,9 @@ Rand: PROCEDURE WORD;
 	_seed = (_seed * a + c) MOD m;
 	RETURN _seed;
 END Rand;
+
+Min: PROCEDURE(a, b) WORD;
+	DECLARE (a, b) WORD;
+	IF a < b THEN RETURN a;
+	ELSE RETURN b;
+END Min;
