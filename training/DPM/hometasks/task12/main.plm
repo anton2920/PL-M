@@ -5,7 +5,7 @@ $INCLUDE('..\..\..\..\home\libs\lib.inc')
 
 	CALL InitRealMathUnit;
 	CALL SetRealMode(0FFFH);
-	
+
 	CALL dos_std_string_out(@('Type a: $'));
 	a = ReadReal;
 
@@ -20,6 +20,6 @@ $INCLUDE('..\..\..\..\home\libs\lib.inc')
 	ELSE
 		CALL dos_std_string_out(@('Triangle may not exist!$'));
 	CALL Println;
-	
+
 	CALL dos_exit(0);
 END main;

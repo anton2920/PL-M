@@ -37,7 +37,7 @@ $INCLUDE(..\libs\lib.inc)
 			CALL dos_exit(1);
 		END;
 	END ASSERT;
-	
+
 	TODO: PROCEDURE(msg);
 		DECLARE msg POINTER;
 		CALL dos_std_string_out(@('TODO: $'));
@@ -45,7 +45,7 @@ $INCLUDE(..\libs\lib.inc)
 		CALL Println;
 		CALL dos_exit(1);
 	END TODO;
-	
+
 	UNREACHABLE: PROCEDURE(msg);
 		DECLARE msg POINTER;
 		CALL dos_std_string_out(@('UNREACHABLE: $'));
@@ -61,7 +61,7 @@ $INCLUDE(..\libs\lib.inc)
 		CALL PrintWord(code);
 		CALL Println;
 	END PrintError;
-	
+
 	PrintReadBytes: PROCEDURE(actual, expected);
 		DECLARE (actual, expected) WORD;
 		IF expected <> actual THEN DO;
@@ -93,7 +93,7 @@ $INCLUDE(..\libs\lib.inc)
 
 		RETURN true;
 	END ReadRecord;
-	
+
 	ProcessRecord: PROCEDURE(prec) BOOL;
 		DECLARE prec POINTER;
 		DECLARE rec BASED prec Record, hdr BASED prec Header;
@@ -143,12 +143,12 @@ $INCLUDE(..\libs\lib.inc)
 				CALL PrintRecordName(pname); CALL Println;
 			END;
 		END PrintModuleName;
-		
+
 		PrintListOfNames: PROCEDURE(siz, plist);
 			DECLARE siz INTEGER, plist POINTER;
 			DECLARE list BASED plist (*)BYTE;
 			DECLARE i INTEGER;
-			
+
 			i = 0;
 			IF siz > 0 THEN DO;
 				CALL dos_std_string_out(@(9, 'NAMES: [$'));
@@ -188,7 +188,7 @@ $INCLUDE(..\libs\lib.inc)
 					CALL UNREACHABLE(@('alignment=7$'));
 				END;
 				CALL dos_std_string_out(atitle); CALL Println;
-				
+
 				c = SHR(segattr.acbp, 2) AND 0111B;
 				CALL dos_std_string_out(@(9, 9, '- Combination: $'));
 				DO CASE c;
@@ -227,14 +227,14 @@ $INCLUDE(..\libs\lib.inc)
 				IF (a = 0) OR (a = 5) THEN DO;
 					CALL ASSERT(c = 0);
 
-	                        	CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
+								CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
 					CALL PrintWordHex(segattr05.fnum);
 					CALL Println;
 
-                	                CALL dos_std_string_out(@(9, 9, '- Offset: $'));
+									CALL dos_std_string_out(@(9, 9, '- Offset: $'));
 					CALL PrintByteHex(segattr05.offt);
 					CALL Println;
-				
+
 					offt = SIZE(segattr05);
 				END; ELSE IF a = 6 THEN DO;
 					DECLARE (bsmTitle, gtitle) POINTER;
@@ -267,7 +267,7 @@ $INCLUDE(..\libs\lib.inc)
 
 			IF b = 0 THEN DO;
 				DECLARE plen POINTER, len BASED plen WORD;
-				plen = @body(offt);	
+				plen = @body(offt);
 				CALL dos_std_string_out(@(9, '- Segment length: $'));
 				CALL PrintWord(len); CALL Println;
 			END;
@@ -284,7 +284,7 @@ $INCLUDE(..\libs\lib.inc)
 				CALL PrintWord(names.ovl); CALL Println;
 			END;
 		END PrintSEGDEF;
-		
+
 		PrintComment: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
@@ -296,26 +296,26 @@ $INCLUDE(..\libs\lib.inc)
 			cls = LOW(typ);
 			nolist  = SHR(HIGH(typ), 6) AND 01B;
 			nopurge = SHR(HIGH(typ), 7) AND 01B;
-			
+
 			CALL dos_std_string_out(@(9, '- Class: $'));
 			IF cls = 0 THEN clstitle = @('language translator comment$');
 			ELSE IF cls = 1 THEN clstitle = @('Intel(R) copyright comment$');
 			ELSE IF cls <= 155 THEN clstitle = @('reserved for Intel(R) use$');
 			ELSE clstitle = @('reserved for users$');
 			CALL dos_std_string_out(clstitle); CALL Println;
-			
+
 			IF nolist  THEN CALL dos_std_string_out(@(9, '- NOLIST:  text in the COMMENT field is not to be listed', 13, 10, '$'));
 			IF nopurge THEN CALL dos_std_string_out(@(9, '- NOPURGE: COMENT record is not purgable', 13, 10, '$'));
-			
+
 			CALL dos_std_string_out(@(9, '- Comment: ''$'));
 			_ = dos_write(1, @body(2), len-2, @n);
 			CALL dos_std_string_out(@('''', 13, 10, '$'));
 		END PrintComment;
-		
+
 		PrintLimitedData: PROCEDURE(pdata, len);
 			DECLARE pdata POINTER, len WORD;
 			DECLARE dat BASED pdata (*)BYTE;
-			DECLARE i WORD;		
+			DECLARE i WORD;
 
 			CALL dos_std_string_out(@(9, '- Data:$'));
 			DO i = 0 TO len-1;
@@ -329,10 +329,10 @@ $INCLUDE(..\libs\lib.inc)
 					CALL dos_std_out(' ');
 					CALL PrintByteHex(dat(i));
 				END;
-                        END;
-                        CALL Println;
+						END;
+						CALL Println;
 		END PrintLimitedData;
-		
+
 		PrintLEDATA: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE LEDHDR LITERALLY 'STRUCTURE(segidx BYTE, offt WORD)';
@@ -373,7 +373,7 @@ $INCLUDE(..\libs\lib.inc)
 		PrintFixupFrame: PROCEDURE(f);
 			DECLARE f BYTE;
 			DECLARE ftitle POINTER;
-			
+
 			DO CASE f;
 				ftitle = @('SI(<seg name>)$');
 				ftitle = @('GI(<grp name>)$');
@@ -389,10 +389,10 @@ $INCLUDE(..\libs\lib.inc)
 			CALL dos_std_string_out(@('] $'));
 			CALL dos_std_string_out(ftitle);
 		END PrintFixupFrame;
-		
+
 		FixupTargetDatum: PROCEDURE(t) POINTER;
 			DECLARE t BYTE;
-			
+
 			DO CASE t;
 				RETURN @('segment index$');
 				RETURN @('group index$');
@@ -409,7 +409,7 @@ $INCLUDE(..\libs\lib.inc)
 
 		FixupFrameDatum: PROCEDURE(f) POINTER;
 			DECLARE f BYTE;
-			
+
 			DO CASE f;
 				RETURN @('segment index$');
 				RETURN @('group index$');
@@ -424,103 +424,103 @@ $INCLUDE(..\libs\lib.inc)
 
 		PrintFixupRecord: PROCEDURE(psaddr, s) WORD;
 			DECLARE psaddr POINTER, s BYTE;
-       			DECLARE saddr BASED psaddr STRUCTURE(dat BYTE, fixup (1)BYTE);
-       			DECLARE (f, frame, t, p, targt) BYTE;
-       			DECLARE (ftitle, ttitle, ptitle) POINTER;
-       			DECLARE pfixup POINTER;
-       			DECLARE fixup BASED pfixup (*)BYTE;
-       			DECLARE (i, idx) WORD;
+	   			DECLARE saddr BASED psaddr STRUCTURE(dat BYTE, fixup (1)BYTE);
+	   			DECLARE (f, frame, t, p, targt) BYTE;
+	   			DECLARE (ftitle, ttitle, ptitle) POINTER;
+	   			DECLARE pfixup POINTER;
+	   			DECLARE fixup BASED pfixup (*)BYTE;
+	   			DECLARE (i, idx) WORD;
 
-       			i = 0;
-       			CALL dos_std_string_out(@(9, 9, '- Fix data:', 13, 10, '$'));
-       			CALL dos_std_string_out(@(9, 9, 9, '- Frame  is specified: $'));
+	   			i = 0;
+	   			CALL dos_std_string_out(@(9, 9, '- Fix data:', 13, 10, '$'));
+	   			CALL dos_std_string_out(@(9, 9, 9, '- Frame  is specified: $'));
 
-       			f = SHR(saddr.dat, 7) AND 01B;
-       			DO CASE f;
-       				ftitle = @('explicitly$');
-       				ftitle = @('by a thread$');
-       			END;
-       			CALL dos_std_string_out(ftitle); CALL Println;
-       			
-       			frame = SHR(saddr.dat, 4) AND 0111B;
+	   			f = SHR(saddr.dat, 7) AND 01B;
+	   			DO CASE f;
+	   				ftitle = @('explicitly$');
+	   				ftitle = @('by a thread$');
+	   			END;
+	   			CALL dos_std_string_out(ftitle); CALL Println;
 
-       			/* NOTE(anton2920): may not be true for general FIXUPP. */
-       			CALL ASSERT((f = 0) AND (frame >= 3) AND (frame <= 6) AND (frame <> 4));
+	   			frame = SHR(saddr.dat, 4) AND 0111B;
 
-       			CALL dos_std_string_out(@(9, 9, 9, '- Frame  is specified as: $'));
-       			CALL PrintFixupFrame(frame); CALL Println;
+	   			/* NOTE(anton2920): may not be true for general FIXUPP. */
+	   			CALL ASSERT((f = 0) AND (frame >= 3) AND (frame <= 6) AND (frame <> 4));
 
-       			CALL dos_std_string_out(@(9, 9, 9, '- Target is specified: $'));
-       			t = SHR(saddr.dat, 3) AND 01B;
-       			DO CASE t;
-       				ttitle = @('explicitly$');
-       				ttitle = @('by a thread$');
-       			END;
-       			CALL dos_std_string_out(ttitle); CALL Println;
-       			
-       			p = SHR(saddr.dat, 2) AND 01B;
-       			CALL dos_std_string_out(@(9, 9, 9, '- Target requires: $'));
-       			DO CASE p;
-       				ptitle = @('$');
-       				ptitle = @('no $');
-       			END;
-       			CALL dos_std_string_out(@('TARGET DISPLACEMENT', 13, 10, '$'));
-       			
-       			targt = saddr.dat AND 011B;
-       			IF t = 1 THEN CALL TODO(@('T = 1$'));
-       			
-    			targt = SHL(p, 3) OR targt;
-       			CALL dos_std_string_out(@(9, 9, 9, '- Target is specified as: $'));
-       			CALL PrintFixupTarget(targt); CALL Println;
+	   			CALL dos_std_string_out(@(9, 9, 9, '- Frame  is specified as: $'));
+	   			CALL PrintFixupFrame(frame); CALL Println;
 
-       			idx = 0;
-       			IF frame = 3 THEN DO;
-       				pfixup = @saddr.fixup(idx);
-       				/* NOTE(anton2920): I don't know what's the actual size
-       				 * (it's specified as a variable-sized field).
-       				 */
-       				CALL dos_std_string_out(@(9, 9, '- Frame $'));
-       				CALL dos_std_string_out(FixupFrameDatum(frame));
-       				CALL dos_std_string_out(@(': $'));
-       				CALL PrintWord(fixup(0)); CALL Println;
-       				idx = idx + 1;
-       			END;
-       			IF t = 0 THEN DO;
-       				pfixup = @saddr.fixup(idx);
-       				/* NOTE(anton2920): I don't know what's the actual size
-       				 * (it's specified as a variable-sized field).
-       				 */
-       				CALL dos_std_string_out(@(9, 9, '- Target $'));
-       				CALL dos_std_string_out(FixupTargetDatum(targt));
-       				CALL dos_std_string_out(@(': $'));
-       				CALL PrintWord(fixup(0)); CALL Println;
-       				idx = idx + 1;
-       			END;
+	   			CALL dos_std_string_out(@(9, 9, 9, '- Target is specified: $'));
+	   			t = SHR(saddr.dat, 3) AND 01B;
+	   			DO CASE t;
+	   				ttitle = @('explicitly$');
+	   				ttitle = @('by a thread$');
+	   			END;
+	   			CALL dos_std_string_out(ttitle); CALL Println;
 
-       			IF p = 0 THEN DO;
-        			pfixup = @saddr.fixup(idx);
-        			CALL dos_std_string_out(@(9, 9, '- Target displacement: $'));
-        			IF s = 0 THEN DO;
-	  	       			DECLARE disp BASED pfixup WORD;
-	 	       			CALL PrintWordHex(disp);
-	 	       			i = i + SIZE(disp);
-        			END; ELSE DO;
-        				DECLARE disp BASED pfixup (3)BYTE;
-        				DECLARE tdisp DWORD;
-        				
-        				tdisp = DOUBLE(DOUBLE(disp(0))) OR
-        					SHL(DOUBLE(DOUBLE(disp(1))), 8) OR
-        					SHR(DOUBLE(DOUBLE(disp(2))), 16);
+	   			p = SHR(saddr.dat, 2) AND 01B;
+	   			CALL dos_std_string_out(@(9, 9, 9, '- Target requires: $'));
+	   			DO CASE p;
+	   				ptitle = @('$');
+	   				ptitle = @('no $');
+	   			END;
+	   			CALL dos_std_string_out(@('TARGET DISPLACEMENT', 13, 10, '$'));
 
-        				CALL PrintDwordHex(tdisp);
-        				i = i + SIZE(tdisp);
-        			END;
-        		END;
+	   			targt = saddr.dat AND 011B;
+	   			IF t = 1 THEN CALL TODO(@('T = 1$'));
 
-       			CALL Println;
-       			RETURN i + idx + 1;
+				targt = SHL(p, 3) OR targt;
+	   			CALL dos_std_string_out(@(9, 9, 9, '- Target is specified as: $'));
+	   			CALL PrintFixupTarget(targt); CALL Println;
+
+	   			idx = 0;
+	   			IF frame = 3 THEN DO;
+	   				pfixup = @saddr.fixup(idx);
+	   				/* NOTE(anton2920): I don't know what's the actual size
+	   				 * (it's specified as a variable-sized field).
+	   				 */
+	   				CALL dos_std_string_out(@(9, 9, '- Frame $'));
+	   				CALL dos_std_string_out(FixupFrameDatum(frame));
+	   				CALL dos_std_string_out(@(': $'));
+	   				CALL PrintWord(fixup(0)); CALL Println;
+	   				idx = idx + 1;
+	   			END;
+	   			IF t = 0 THEN DO;
+	   				pfixup = @saddr.fixup(idx);
+	   				/* NOTE(anton2920): I don't know what's the actual size
+	   				 * (it's specified as a variable-sized field).
+	   				 */
+	   				CALL dos_std_string_out(@(9, 9, '- Target $'));
+	   				CALL dos_std_string_out(FixupTargetDatum(targt));
+	   				CALL dos_std_string_out(@(': $'));
+	   				CALL PrintWord(fixup(0)); CALL Println;
+	   				idx = idx + 1;
+	   			END;
+
+	   			IF p = 0 THEN DO;
+					pfixup = @saddr.fixup(idx);
+					CALL dos_std_string_out(@(9, 9, '- Target displacement: $'));
+					IF s = 0 THEN DO;
+	  		   			DECLARE disp BASED pfixup WORD;
+	 		   			CALL PrintWordHex(disp);
+	 		   			i = i + SIZE(disp);
+					END; ELSE DO;
+						DECLARE disp BASED pfixup (3)BYTE;
+						DECLARE tdisp DWORD;
+
+						tdisp = DOUBLE(DOUBLE(disp(0))) OR
+							SHL(DOUBLE(DOUBLE(disp(1))), 8) OR
+							SHR(DOUBLE(DOUBLE(disp(2))), 16);
+
+						CALL PrintDwordHex(tdisp);
+						i = i + SIZE(tdisp);
+					END;
+				END;
+
+	   			CALL Println;
+	   			RETURN i + idx + 1;
 		END PrintFixupRecord;
-		
+
 		PrintModEnd: PROCEDURE(pbody);
 			DECLARE pbody POINTER;
 			DECLARE modend BASED pbody STRUCTURE(typ BYTE, saddr (1)BYTE);
@@ -557,22 +557,22 @@ $INCLUDE(..\libs\lib.inc)
 				CALL dos_std_string_out(ltitle); CALL Println;
 
 				CALL dos_std_string_out(@(9, '- Start address:', 13, 10, '$'));
-				
+
 				IF l <> 0 THEN _ = PrintFixupRecord(@modend.saddr, 0);
-                                ELSE DO;
-                                	DECLARE psaddr POINTER;			
+								ELSE DO;
+									DECLARE psaddr POINTER;
 					DECLARE saddr BASED psaddr STRUCTURE(fnum WORD, offt WORD);
 
 					psaddr = @modend.saddr;
-                                	CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
+									CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
 					CALL PrintWordHex(saddr.fnum); CALL Println;
-					
+
 					CALL dos_std_string_out(@(9, 9, '- Offset: $'));
 					CALL PrintWordHex(saddr.offt); CALL Println;
 				END;
 			END;
 		END PrintModEnd;
-		
+
 		PrintTYPDEF: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
@@ -611,7 +611,7 @@ $INCLUDE(..\libs\lib.inc)
 					DECLARE thread BASED pbody STRUCTURE(dat BYTE, num BYTE);
 					DECLARE (d, method, thred) BYTE;
 					DECLARE dtitle POINTER;
-					
+
 					CALL dos_std_string_out(@(9, '- THREAD field:', 13, 10, '$'));
 					CALL dos_std_string_out(@(9, 9, '- Thread data:', 13, 10, '$'));
 
@@ -622,7 +622,7 @@ $INCLUDE(..\libs\lib.inc)
 						dtitle = @('frame thread$');
 					END;
 					CALL dos_std_string_out(dtitle); CALL Println;
-					
+
 					method = SHR(thread.dat, 2) AND 0111B;
 					IF d = 0 THEN DO;
 						method = method AND 011B;
@@ -633,14 +633,14 @@ $INCLUDE(..\libs\lib.inc)
 						CALL PrintFixupFrame(method);
 					END;
 					CALL Println;
-					
+
 					thred = thread.dat AND 011B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Thread number: $'));
 					CALL PrintWord(thred); CALL Println;
-					
+
 					IF (d = 0) OR ((d = 1) AND (method <= 3)) THEN DO;
 						DECLARE ftitle POINTER;
-						
+
 						DO CASE method;
 							ftitle = @('Segment index$');
 							ftitle = @('Group index$');
@@ -657,7 +657,7 @@ $INCLUDE(..\libs\lib.inc)
 						i = i + 1;
 					END;
 
-					i = i + 1;					
+					i = i + 1;
 					len = len - i;
 				END; ELSE DO;
 					DECLARE fixup BASED pbody STRUCTURE(locat WORD, fixupp (1)byte);
@@ -666,7 +666,7 @@ $INCLUDE(..\libs\lib.inc)
 
 					CALL dos_std_string_out(@(9, '- FIXUP field:', 13, 10, '$'));
 					CALL dos_std_string_out(@(9, 9, '- LOCAT:', 13, 10, '$'));
-					
+
 					m = SHR(fixup.locat, 14) AND 01B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Fixup mode: $'));
 					DO CASE m;
@@ -694,7 +694,7 @@ $INCLUDE(..\libs\lib.inc)
 						loctitle = @('hibyte$');
 					END;
 					CALL dos_std_string_out(loctitle); CALL Println;
-					
+
 					offt = fixup.locat AND 01111111111B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Data record offset: $'));
 					CALL PrintWordHex(offt); CALL Println;
@@ -704,58 +704,58 @@ $INCLUDE(..\libs\lib.inc)
 				END;
 			END;
 		END PrintFIXUPP;
-		
+
 		PrintREGINT: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
 			DECLARE (typ, id, l) BYTE;
 			DECLARE (idtitle, ltitle) POINTER;
 			DECLARE i WORD;
-			
+
 			i = 0;
 			DO WHILE len > 0;
 				pbody = @body(i);
 				i = 0;
 
-	      			typ = body(0);
-         			CALL dos_std_string_out(@(9, '- Register type:', 13, 10, '$'));
+		  			typ = body(0);
+		 			CALL dos_std_string_out(@(9, '- Register type:', 13, 10, '$'));
 
-         			id = SHR(typ, 6) AND 011B;
-         			CALL dos_std_string_out(@(9, 9, '- Register/register pair: $'));
-         			DO CASE id;
-         				idtitle = @('CS and IP$');
-         				idtitle = @('SS and SP$');
-         				idtitle = @('DS$');
-         				idtitle = @('ES$');
-         			END;
-         			CALL dos_std_string_out(idtitle); CALL Println;
-         	
-         			l = typ AND 01B;
-         			CALL dos_std_string_out(@(9, 9, '- Register contents interpretation: $'));
-         			DO CASE l;
-         				ltitle = @('base + offset$');
-         				ltitle = @('locical address$');
-         			END;
-         			CALL dos_std_string_out(ltitle); CALL Println;
+		 			id = SHR(typ, 6) AND 011B;
+		 			CALL dos_std_string_out(@(9, 9, '- Register/register pair: $'));
+		 			DO CASE id;
+		 				idtitle = @('CS and IP$');
+		 				idtitle = @('SS and SP$');
+		 				idtitle = @('DS$');
+		 				idtitle = @('ES$');
+		 			END;
+		 			CALL dos_std_string_out(idtitle); CALL Println;
 
-         			IF l <> 0 THEN i = i + PrintFixupRecord(@body(1), 0);
-         			ELSE DO;
-         				i = i + PrintLocalSymbolBase(@body(1));
-         				IF id <= 1 THEN DO;
-         					DECLARE pofft POINTER, offt BASED pofft WORD;
+		 			l = typ AND 01B;
+		 			CALL dos_std_string_out(@(9, 9, '- Register contents interpretation: $'));
+		 			DO CASE l;
+		 				ltitle = @('base + offset$');
+		 				ltitle = @('locical address$');
+		 			END;
+		 			CALL dos_std_string_out(ltitle); CALL Println;
 
-         					pofft = @body(i+1);
-         					CALL dos_std_string_out(@(9, 9, '- Register offset: $'));
-         					CALL PrintWordHex(offt); CALL Println;
-         					i = i + SIZE(offt);
-         				END;
-                                END;
+		 			IF l <> 0 THEN i = i + PrintFixupRecord(@body(1), 0);
+		 			ELSE DO;
+		 				i = i + PrintLocalSymbolBase(@body(1));
+		 				IF id <= 1 THEN DO;
+		 					DECLARE pofft POINTER, offt BASED pofft WORD;
 
-         			i = i + 1;
-         			len = len - i;
-         		END;
+		 					pofft = @body(i+1);
+		 					CALL dos_std_string_out(@(9, 9, '- Register offset: $'));
+		 					CALL PrintWordHex(offt); CALL Println;
+		 					i = i + SIZE(offt);
+		 				END;
+								END;
+
+		 			i = i + 1;
+		 			len = len - i;
+		 		END;
 		END PrintREGINT;
-		
+
 		PrintRHEADR: PROCEDURE(pbody);
 			DECLARE pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
@@ -763,12 +763,12 @@ $INCLUDE(..\libs\lib.inc)
 			DECLARE info BASED pbody STRUCTURE(siz DWORD, maxsiz DWORD, dyn DWORD, maxdyn DWORD);
 			DECLARE typ BYTE;
 			DECLARE typtitle POINTER;
-			
+
 			CALL PrintModuleName(@body);
 			pbody = @body(body(0) + 1);
 
 			CALL dos_std_string_out(@(9, '- R-module attribute:', 13, 10, '$'));
-	
+
 			typ = attr.dat AND 011B;
 			CALL dos_std_string_out(@(9, 9, '- Module type: $'));
 			DO CASE typ;
@@ -778,41 +778,41 @@ $INCLUDE(..\libs\lib.inc)
 				typtitle = @('LTL module; maybe base fixups are needed$');
 			END;
 			CALL dos_std_string_out(typtitle); CALL Println;
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Number of segment definitions: $'));
 			CALL PrintWord(attr.segcnt); CALL Println;
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Number of group   definitions: $'));
 			CALL PrintWord(attr.grpcnt); CALL Println;
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Number of overlay definitions: $'));
 			CALL PrintWord(attr.ovlcnt); CALL Println;
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Overlay record offset: $'));
 			CALL PrintDword(attr.ovlofft); CALL Println;
-			
+
 			pbody = @body(SIZE(attr));
-			
+
 			CALL dos_std_string_out(@(9, '- R-module info:', 13, 10, '$'));
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Static size: $'));
 			CALL PrintDword(info.siz);
 			CALL dos_std_string_out(@(' (maximum: $'));
-			CALL PrintDword(info.maxsiz); 
+			CALL PrintDword(info.maxsiz);
 			CALL dos_std_string_out(@(')', 13, 10, '$'));
-			
+
 			CALL dos_std_string_out(@(9, 9, '- Dynamic storage: $'));
 			CALL PrintDword(info.dyn);
 			CALL dos_std_string_out(@(' (maximum: $'));
-			CALL PrintDword(info.maxdyn); 
+			CALL PrintDword(info.maxdyn);
 			CALL dos_std_string_out(@(')', 13, 10, '$'));
 		END PrintRHEADR;
-		
+
 		PrintLocalSymbolBase: PROCEDURE(pbase) WORD;
 			DECLARE pbase POINTER;
 			DECLARE base BASED pbase STRUCTURE(grpidx BYTE, segidx BYTE, fnum WORD);
 			DECLARE offt WORD;
-			
+
 			offt = SIZE(base.grpidx) + SIZE(base.segidx);
 			IF base.grpidx > 0 THEN DO;
 				CALL ASSERT(base.segidx > 0);
@@ -830,24 +830,24 @@ $INCLUDE(..\libs\lib.inc)
 
 			RETURN offt;
 		END PrintLocalSymbolBase;
-		
+
 		PrintREDATA: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
 			DECLARE datOfft BASED pbody WORD;
 			DECLARE offt WORD;
-			
+
 			CALL dos_std_string_out(@(9, '- Data record base:', 13, 10, '$'));
 			offt = PrintLocalSymbolBase(@body);
 
 			pbody = @body(offt);
 			CALL dos_std_string_out(@(9, '- Data record offset: $'));
 			CALL PrintWordHex(datOfft); CALL Println;
-			
+
 			pbody = @body(2);
 			CALL PrintLimitedData(@body, len-offt-2);
 		END PrintREDATA;
-		
+
 		PrintPEDATA: PROCEDURE(len, pbody);
 			DECLARE len WORD, pbody POINTER;
 			DECLARE body BASED pbody (*)BYTE;
@@ -855,7 +855,7 @@ $INCLUDE(..\libs\lib.inc)
 
 			CALL dos_std_string_out(@(9, '- Frame number: $'));
 			CALL PrintWordHex(hdr.fnum); CALL Println;
-			
+
 			CALL ASSERT(hdr.offt < 16);
 			CALL dos_std_string_out(@(9, '- Offset: $'));
 			CALL PrintWord(hdr.offt); CALL Println;
@@ -868,7 +868,7 @@ $INCLUDE(..\libs\lib.inc)
 			DECLARE body BASED rec.body (*)BYTE;
 			RETURN body(rec.hdr.siz-1);
 		END RecordChecksum;
-		
+
 		VerifyRecordChecksum: PROCEDURE(prec) BOOL;
 			DECLARE prec POINTER, rec BASED prec Record;
 			DECLARE recArray BASED prec (*)BYTE;
@@ -890,7 +890,7 @@ $INCLUDE(..\libs\lib.inc)
 				CALL PrintByteHex(sum); CALL Println;
 				RETURN false;
 			END;
-			
+
 			RETURN true;
 		END VerifyRecordChecksum;
 
@@ -951,7 +951,7 @@ $INCLUDE(..\libs\lib.inc)
 	psps = dos_get_psp;
 	IF psp.argLen > 0 THEN DO;
 		DECLARE i WORD;
-		
+
 		DO i = 0 TO Min(psp.argLen, SIZE(path)-1);
 			IF psp.argBuf(i) = 13 THEN GO TO FIN;
 			path(i) = psp.argBuf(i+1);
