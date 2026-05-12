@@ -1,0 +1,17 @@
+main: DO;
+	dos_std_string_out: PROCEDURE(ps$) EXTERNAL;
+		DECLARE ps$ POINTER;
+	END dos_std_string_out;
+
+	dos_exit: PROCEDURE(code) EXTERNAL;
+		DECLARE code WORD;
+	END dos_exit;
+
+	c_print: PROCEDURE(s) EXTERNAL;
+		DECLARE s POINTER;
+	END c_print;
+
+	CALL dos_std_string_out(@('Hello from ASM!', 13, 10, '$'));
+	CALL c_print(@('Hello from C!', 13, 10, '$'));
+	CALL dos_exit(0);
+END main;
