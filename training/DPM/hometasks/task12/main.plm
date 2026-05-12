@@ -1,0 +1,25 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE (a, b, c) REAL;
+
+	CALL InitRealMathUnit;
+	CALL SetRealMode(0FFFH);
+	
+	CALL dos_std_string_out(@('Type a: $'));
+	a = ReadReal;
+
+	CALL dos_std_string_out(@('Type b: $'));
+	b = ReadReal;
+
+	CALL dos_std_string_out(@('Type c: $'));
+	c = ReadReal;
+
+	IF (a < b + c) AND (b < a + c) AND (c < a + b) THEN
+		CALL dos_std_string_out(@('Triangle may exist$'));
+	ELSE
+		CALL dos_std_string_out(@('Triangle may not exist!$'));
+	CALL Println;
+	
+	CALL dos_exit(0);
+END main;

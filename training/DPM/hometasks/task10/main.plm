@@ -1,0 +1,25 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	F: PROCEDURE(x) REAL;
+		DECLARE x REAL;
+		
+		IF x < 0. THEN RETURN ABS(x);
+		ELSE IF x = 0. THEN RETURN 0.;
+		ELSE RETURN x - 2.;
+	END F;
+
+	DECLARE x REAL;
+
+	CALL InitRealMathUnit;
+	CALL SetRealMode(0FFFH);
+
+	CALL dos_std_string_out(@('Type x: $'));
+	x = ReadReal;
+	
+	CALL dos_std_string_out(@('f($')); CALL PrintReal(x);
+	CALL dos_std_string_out(@(') = $')); CALL PrintReal(F(x));
+	CALL Println;
+
+	CALL dos_exit(0);
+END main;

@@ -1,0 +1,30 @@
+main: DO;
+$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('..\..\..\..\home\libs\lib.inc')
+	DECLARE coord POINTER;
+	DECLARE (x, y) REAL;
+
+	CALL InitRealMathUnit;
+	CALL SetRealMode(0FFFH);
+
+	CALL dos_std_string_out(@('Type x: $'));
+	x = ReadReal;
+
+	CALL dos_std_string_out(@('Type y: $'));
+	y = ReadReal;
+
+	IF (x > 0.) AND (y > 0.) THEN coord = @('first$');
+	ELSE IF (x < 0.) AND (y > 0.) THEN coord = @('second$');
+	ELSE IF (x < 0.) AND (y < 0.) THEN coord = @('third$');
+	ELSE IF (x > 0.) AND (y < 0.) THEN coord = @('fourth$');
+
+	CALL dos_std_string_out(@('Point with coordinates ($'));
+	CALL PrintReal(x);
+	CALL dos_std_string_out(@(', $'));
+	CALL PrintReal(y);
+	CALL dos_std_string_out(@(') belongs to $'));
+	CALL dos_std_string_out(coord);
+	CALL dos_std_string_out(@(' coordinate part', 13, 10, '$'));
+
+	CALL dos_exit(0);
+END main;
