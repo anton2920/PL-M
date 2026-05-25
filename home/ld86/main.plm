@@ -14,7 +14,7 @@ $INCLUDE(..\libs\lib.inc)
 	DECLARE Node LITERALLY 'STRUCTURE(rec Record, next POINTER)';
 
 	DECLARE MemTop WORD INITIAL(0);
-	DECLARE Mem (4096)BYTE;
+	DECLARE Mem (16384)BYTE;
 	MemAlloc: PROCEDURE(n) POINTER;
 		DECLARE (n, prev) WORD;
 
@@ -467,6 +467,7 @@ $INCLUDE(..\libs\lib.inc)
 	   			frame = SHR(saddr.dat, 4) AND 0111B;
 
 	   			/* NOTE(anton2920): may not be true for general FIXUPP. */
+	   			/* TODO(anton2920): fix this assert! */
 	   			CALL ASSERT((f = 0) AND (frame >= 3) AND (frame <= 6) AND (frame <> 4));
 
 	   			CALL dos_std_string_out(@(9, 9, 9, '- Frame  is specified as: $'));
@@ -886,6 +887,102 @@ $INCLUDE(..\libs\lib.inc)
 			CALL PrintLimitedData(@hdr.dat, len-SIZE(hdr.fnum)-SIZE(hdr.offt));
 		END PrintPEDATA;
 
+		PrintGRPDEF: PROCEDURE(len, pbody);
+			DECLARE len WORD, pbody POINTER;
+			DECLARE body BASED pbody (*)BYTE;
+			DECLARE idx BASED pbody BYTE;
+			DECLARE pdesc POINTER;
+			DECLARE i WORD;
+
+			CALL dos_std_string_out(@(9, '- Group name index: $'));
+			CALL PrintWord(idx); CALL Println;
+
+			i = SIZE(idx);
+			DO WHILE i < len;
+				pdesc = @body(i);
+				IF body(i) = 0FFH THEN DO;
+					DECLARE desc BASED pdesc STRUCTURE(_ BYTE, idx BYTE);
+
+					CALL dos_std_string_out(@(9, '- Segment index: $'));
+					CALL PrintWord(desc.idx); CALL Println;
+
+					i = i + SIZE(desc);
+				END; ELSE IF body(i) = 0FEH THEN DO;
+					DECLARE desc BASED pdesc STRUCTURE(_ BYTE, idx BYTE);
+
+					CALL dos_std_string_out(@(9, '- External index: $'));
+					CALL PrintWord(desc.idx); CALL Println;
+
+					i = i + SIZE(desc);
+				END; ELSE IF body(i) = 0FDH THEN DO;
+					DECLARE desc BASED pdesc STRUCTURE(_ BYTE, segidx BYTE, clsidx BYTE, grpidx BYTE);
+
+					CALL dos_std_string_out(@(9, '- Segment name index: $'));
+					CALL PrintWord(desc.segidx); CALL Println;
+
+					CALL dos_std_string_out(@(9, '- Class   name index: $'));
+					CALL PrintWord(desc.clsidx); CALL Println;
+
+					CALL dos_std_string_out(@(9, '- Group   name index: $'));
+					CALL PrintWord(desc.grpidx); CALL Println;
+
+					i = i + SIZE(desc);
+				END; ELSE IF body(i) = 0FBH THEN DO;
+					DECLARE desc BASED pdesc STRUCTURE(_ BYTE, ltl BYTE, max WORD, len WORD);
+					DECLARE (blen, bmax) BYTE;
+
+					blen = SHR(desc.ltl, 1) AND 01B;
+					bmax = desc.ltl AND 01B;
+
+					CALL dos_std_string_out(@(9, '- Group length: $'));
+					DO CASE blen;
+						CALL PrintWord(desc.len);
+						CALL dos_std_string_out(@('exactly 64K$'));
+					END;
+					CALL dos_std_string_out(@(' (maximum: $'));
+					DO CASE bmax;
+						CALL PrintWord(desc.max);
+						CALL dos_std_string_out(@('exactly 64K$'));
+					END;
+					CALL dos_std_string_out(@(')', 13, 10, '$'));
+
+					i = i + SIZE(desc);
+				END; ELSE IF body(i) = 0FAH THEN DO;
+					DECLARE desc BASED pdesc STRUCTURE(_ BYTE, frame WORD, offt BYTE);
+					CALL ASSERT(desc.offt < 16);
+					
+					CALL dos_std_string_out(@(9, '- Frame number: $'));
+					CALL PrintWord(desc.frame); CALL Println;
+					
+					CALL dos_std_string_out(@(9, '- Offset number: $'));
+					CALL PrintWord(desc.offt); CALL Println;
+					
+					i = i + SIZE(desc);
+				END; ELSE CALL UNREACHABLE(@('unknown group component descriptor type$'));
+			END;
+		END PrintGRPDEF;
+
+		PrintEXTDEF: PROCEDURE(len, pbody);
+			DECLARE len WORD, pbody POINTER;
+			DECLARE body BASED pbody (*)BYTE;
+			DECLARE name BASED pbody STRUCTURE(len BYTE, dat (1)BYTE);
+			DECLARE idx BASED pbody BYTE;
+			DECLARE i WORD;
+
+			i = 0;
+			DO WHILE i < len;
+				CALL dos_std_string_out(@(9, '- External name: $'));
+				CALL PrintRecordName(@name);
+				i = i + name.len + SIZE(name.len);
+				pbody = @body(name.len + SIZE(name.len));
+
+				CALL dos_std_string_out(@(', type index: $'));
+				CALL PrintWord(idx); CALL Println;
+				i = i + SIZE(idx);
+				pbody = @body(SIZE(idx));
+			END;
+		END PrintEXTDEF;
+
 		RecordChecksum: PROCEDURE(prec) BYTE;
 			DECLARE prec POINTER, rec BASED prec Record;
 			DECLARE body BASED rec.body (*)BYTE;
@@ -941,6 +1038,9 @@ $INCLUDE(..\libs\lib.inc)
 		END; ELSE IF hdr.typ = 08AH THEN DO;
 			CALL PrintRecordHeader(@('MODEND'), @rec.hdr);
 			CALL PrintModEnd(rec.body);
+		END; ELSE IF hdr.typ = 08CH THEN DO;
+			CALL PrintRecordHeader(@('EXTDEF'), @rec.hdr);
+			CALL PrintEXTDEF(rec.hdr.siz-1, rec.body);
 		END; ELSE IF hdr.typ = 08EH THEN DO;
 			CALL PrintRecordHeader(@('TYPDEF'), @rec.hdr);
 			CALL PrintTYPDEF(rec.hdr.siz-1, rec.body);
@@ -950,6 +1050,9 @@ $INCLUDE(..\libs\lib.inc)
 		END; ELSE IF hdr.typ = 098H THEN DO;
 			CALL PrintRecordHeader(@('SEGDEF'), @rec.hdr);
 			CALL PrintSEGDEF(rec.body);
+		END; ELSE IF hdr.typ = 09AH THEN DO;
+			CALL PrintRecordHeader(@('GRPDEF'), @rec.hdr);
+			CALL PrintGRPDEF(rec.hdr.siz-1, rec.body);
 		END; ELSE IF hdr.typ = 09CH THEN DO;
 			CALL PrintRecordHeader(@('FIXUPP'), @rec.hdr);
 			CALL PrintFIXUPP(rec.hdr.siz-1, rec.body);
@@ -965,14 +1068,14 @@ $INCLUDE(..\libs\lib.inc)
 		RETURN VerifyRecordChecksum(prec);
 	END ProcessRecord;
 
-	DECLARE path (128)BYTE INITIAL('C:\Dist\PLM\EXPERI~1\asm\main.86', 0);
+	DECLARE path (128)BYTE INITIAL('main.obj', 0);
 	DECLARE psps SELECTOR, psp BASED psps ProgramSegmentPrefix;
 	DECLARE (root, pnd) POINTER;
 	DECLARE nd BASED pnd Node;
 	DECLARE (f, ret) WORD;
 
 	psps = dos_get_psp;
-	IF psp.argLen > 0 THEN DO;
+	IF (psp.argLen > 0) AND (psp.argBuf(0) <> 13) THEN DO;
 		DECLARE i WORD;
 
 		DO i = 0 TO Min(psp.argLen, SIZE(path)-1);
