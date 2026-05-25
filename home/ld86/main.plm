@@ -227,11 +227,11 @@ $INCLUDE(..\libs\lib.inc)
 				IF (a = 0) OR (a = 5) THEN DO;
 					CALL ASSERT(c = 0);
 
-								CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
+					CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
 					CALL PrintWordHex(segattr05.fnum);
 					CALL Println;
 
-									CALL dos_std_string_out(@(9, 9, '- Offset: $'));
+					CALL dos_std_string_out(@(9, 9, '- Offset: $'));
 					CALL PrintByteHex(segattr05.offt);
 					CALL Println;
 
@@ -329,8 +329,8 @@ $INCLUDE(..\libs\lib.inc)
 					CALL dos_std_out(' ');
 					CALL PrintByteHex(dat(i));
 				END;
-						END;
-						CALL Println;
+			END;
+			CALL Println;
 		END PrintLimitedData;
 
 		PrintLEDATA: PROCEDURE(len, pbody);
@@ -476,9 +476,7 @@ $INCLUDE(..\libs\lib.inc)
 	   			idx = 0;
 	   			IF frame = 3 THEN DO;
 	   				pfixup = @saddr.fixup(idx);
-	   				/* NOTE(anton2920): I don't know what's the actual size
-	   				 * (it's specified as a variable-sized field).
-	   				 */
+	   				/* NOTE(anton2920): I don't know what's the actual size (it's specified as a variable-sized field). */
 	   				CALL dos_std_string_out(@(9, 9, '- Frame $'));
 	   				CALL dos_std_string_out(FixupFrameDatum(frame));
 	   				CALL dos_std_string_out(@(': $'));
@@ -487,9 +485,7 @@ $INCLUDE(..\libs\lib.inc)
 	   			END;
 	   			IF t = 0 THEN DO;
 	   				pfixup = @saddr.fixup(idx);
-	   				/* NOTE(anton2920): I don't know what's the actual size
-	   				 * (it's specified as a variable-sized field).
-	   				 */
+	   				/* NOTE(anton2920): I don't know what's the actual size (it's specified as a variable-sized field). */
 	   				CALL dos_std_string_out(@(9, 9, '- Target $'));
 	   				CALL dos_std_string_out(FixupTargetDatum(targt));
 	   				CALL dos_std_string_out(@(': $'));
@@ -559,12 +555,12 @@ $INCLUDE(..\libs\lib.inc)
 				CALL dos_std_string_out(@(9, '- Start address:', 13, 10, '$'));
 
 				IF l <> 0 THEN _ = PrintFixupRecord(@modend.saddr, 0);
-								ELSE DO;
-									DECLARE psaddr POINTER;
+				ELSE DO;
+					DECLARE psaddr POINTER;
 					DECLARE saddr BASED psaddr STRUCTURE(fnum WORD, offt WORD);
 
 					psaddr = @modend.saddr;
-									CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
+					CALL dos_std_string_out(@(9, 9, '- Frame number: $'));
 					CALL PrintWordHex(saddr.fnum); CALL Println;
 
 					CALL dos_std_string_out(@(9, 9, '- Offset: $'));
@@ -717,43 +713,43 @@ $INCLUDE(..\libs\lib.inc)
 				pbody = @body(i);
 				i = 0;
 
-		  			typ = body(0);
-		 			CALL dos_std_string_out(@(9, '- Register type:', 13, 10, '$'));
+	  			typ = body(0);
+	 			CALL dos_std_string_out(@(9, '- Register type:', 13, 10, '$'));
 
-		 			id = SHR(typ, 6) AND 011B;
-		 			CALL dos_std_string_out(@(9, 9, '- Register/register pair: $'));
-		 			DO CASE id;
-		 				idtitle = @('CS and IP$');
-		 				idtitle = @('SS and SP$');
-		 				idtitle = @('DS$');
-		 				idtitle = @('ES$');
-		 			END;
-		 			CALL dos_std_string_out(idtitle); CALL Println;
+	 			id = SHR(typ, 6) AND 011B;
+	 			CALL dos_std_string_out(@(9, 9, '- Register/register pair: $'));
+	 			DO CASE id;
+	 				idtitle = @('CS and IP$');
+	 				idtitle = @('SS and SP$');
+	 				idtitle = @('DS$');
+	 				idtitle = @('ES$');
+	 			END;
+	 			CALL dos_std_string_out(idtitle); CALL Println;
 
-		 			l = typ AND 01B;
-		 			CALL dos_std_string_out(@(9, 9, '- Register contents interpretation: $'));
-		 			DO CASE l;
-		 				ltitle = @('base + offset$');
-		 				ltitle = @('locical address$');
-		 			END;
-		 			CALL dos_std_string_out(ltitle); CALL Println;
+	 			l = typ AND 01B;
+	 			CALL dos_std_string_out(@(9, 9, '- Register contents interpretation: $'));
+	 			DO CASE l;
+	 				ltitle = @('base + offset$');
+	 				ltitle = @('locical address$');
+	 			END;
+	 			CALL dos_std_string_out(ltitle); CALL Println;
 
-		 			IF l <> 0 THEN i = i + PrintFixupRecord(@body(1), 0);
-		 			ELSE DO;
-		 				i = i + PrintLocalSymbolBase(@body(1));
-		 				IF id <= 1 THEN DO;
-		 					DECLARE pofft POINTER, offt BASED pofft WORD;
+	 			IF l <> 0 THEN i = i + PrintFixupRecord(@body(1), 0);
+	 			ELSE DO;
+	 				i = i + PrintLocalSymbolBase(@body(1));
+	 				IF id <= 1 THEN DO;
+	 					DECLARE pofft POINTER, offt BASED pofft WORD;
 
-		 					pofft = @body(i+1);
-		 					CALL dos_std_string_out(@(9, 9, '- Register offset: $'));
-		 					CALL PrintWordHex(offt); CALL Println;
-		 					i = i + SIZE(offt);
-		 				END;
-								END;
+	 					pofft = @body(i+1);
+	 					CALL dos_std_string_out(@(9, 9, '- Register offset: $'));
+	 					CALL PrintWordHex(offt); CALL Println;
+	 					i = i + SIZE(offt);
+	 				END;
+							END;
 
-		 			i = i + 1;
-		 			len = len - i;
-		 		END;
+	 			i = i + 1;
+	 			len = len - i;
+		 	END;
 		END PrintREGINT;
 
 		PrintRHEADR: PROCEDURE(pbody);
@@ -953,7 +949,7 @@ $INCLUDE(..\libs\lib.inc)
 		DECLARE i WORD;
 
 		DO i = 0 TO Min(psp.argLen, SIZE(path)-1);
-			IF psp.argBuf(i) = 13 THEN GO TO FIN;
+			IF psp.argBuf(i+1) = 13 THEN GO TO FIN;
 			path(i) = psp.argBuf(i+1);
 		END; FIN:
 

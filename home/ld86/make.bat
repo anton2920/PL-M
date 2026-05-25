@@ -14,13 +14,15 @@ IF ERRORLEVEL 1 GOTO STOP
 UDI2DOS main.86
 IF ERRORLEVEL 1 GOTO STOP
 
-main C:\Dist\PLM\EXPERI~1\asm\main.lnk
+set BASE=C:
+
+main %BASE%\EXPERI~1\asm\main.lnk
 IF ERRORLEVEL 1 GOTO STOP
 
-main C:\Dist\PLM\EXPERI~1\asm\main.obj >result.obj
-main C:\Dist\PLM\EXPERI~1\asm\main.lnk >result.lnk
-main C:\Dist\PLM\EXPERI~1\asm\main.86  >result.86
-main C:\Dist\PLM\EXPERI~1\asm\main.bin >result.bin
+main %BASE%\EXPERI~1\asm\main.obj >result.obj
+main %BASE%\EXPERI~1\asm\main.lnk >result.lnk
+main %BASE%\EXPERI~1\asm\main.86  >result.86
+main %BASE%\EXPERI~1\asm\main.bin >result.bin
 
 :STOP
 set PATH=%TPATH%
