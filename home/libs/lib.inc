@@ -202,3 +202,9 @@ Min: PROCEDURE(a, b) WORD;
 	IF a < b THEN RETURN a;
 	ELSE RETURN b;
 END Min;
+
+Max: PROCEDURE(a, b) WORD;
+	DECLARE (a, b) WORD;
+	IF a > b THEN RETURN a;
+	ELSE RETURN b;
+END Max;

@@ -151,7 +151,7 @@ $INCLUDE(..\libs\lib.inc)
 
 			i = 0;
 			IF siz > 0 THEN DO;
-				CALL dos_std_string_out(@(9, 'NAMES: [$'));
+				CALL dos_std_string_out(@(9, '- Names: [$'));
 				DO WHILE siz-i > 0;
 					CALL PrintRecordName(@list(i));
 					i = i + INT(list(i)) + 1;
@@ -179,12 +179,12 @@ $INCLUDE(..\libs\lib.inc)
 				CALL dos_std_string_out(@(9, 9, '- Alignment: $'));
 				DO CASE a;
 					atitle = @('absolute LSEG$');
-					atitle = @('reloc, byte align LSEG$');
-					atitle = @('reloc, word align LSEG$');
-					atitle = @('reloc, para align LSEG$');
-					atitle = @('reloc, page align LSEG$');
+					atitle = @('relocatable, byte aligned LSEG$');
+					atitle = @('relocatable, word aligned LSEG$');
+					atitle = @('relocatable, paragraph aligned LSEG$');
+					atitle = @('relocatable, page aligned LSEG$');
 					atitle = @('unnamed absolute portion of MAS$');
-					atitle = @('LTL, para align LSEG$');
+					atitle = @('load-time-locatable (LTL), paragraph aligned LSEG$');
 					CALL UNREACHABLE(@('alignment=7$'));
 				END;
 				CALL dos_std_string_out(atitle); CALL Println;
@@ -313,19 +313,41 @@ $INCLUDE(..\libs\lib.inc)
 		END PrintComment;
 
 		PrintLimitedData: PROCEDURE(pdata, len);
+			PrintByteHex: PROCEDURE(n);
+				DECLARE n BYTE;
+				DECLARE (hdigit, shift, i) BYTE;
+				shift = SIZE(n) * 8 - 4;
+
+				IF n = 0 THEN DO; CALL dos_std_out('0'); CALL dos_std_out('0'); END;
+				ELSE DO i = 1 TO SIZE(n)*2;
+					hdigit = SHR(n, shift) AND 0FH;
+					IF (hdigit >= 0) AND (hdigit <= 9) THEN
+						CALL dos_std_out(hdigit + '0');
+					ELSE
+						CALL dos_std_out(hdigit - 10 + 'A');
+					shift = shift - 4;
+				END;
+			END;
+
+			Max: PROCEDURE(a, b) INTEGER;
+				DECLARE (a, b) INTEGER;
+				IF a > b THEN RETURN a;
+				ELSE RETURN b;
+			END Max;
+
 			DECLARE pdata POINTER, len WORD;
 			DECLARE dat BASED pdata (*)BYTE;
-			DECLARE i WORD;
+			DECLARE limit LITERALLY '15';
+			DECLARE i INTEGER;
 
 			CALL dos_std_string_out(@(9, '- Data:$'));
-			DO i = 0 TO len-1;
-				IF i > 5 THEN GO TO LAST;
+			DO i = 0 TO Min(limit, len)-1;
 				CALL dos_std_out(' ');
 				CALL PrintByteHex(dat(i));
 			END;
-			LAST: IF len - 1 - 5 >= 0 THEN DO;
-				IF len - 1 - 5 > 0 THEN CALL dos_std_string_out(@(' ...$'));
-				DO i = len - 1 - 5 TO len - 1;
+			IF INT(len) - limit >= 0 THEN DO;
+				IF INT(len) - limit > limit-1 THEN CALL dos_std_string_out(@(' ...$'));
+				DO i = Max(i, INT(len) - limit) TO len - 1;
 					CALL dos_std_out(' ');
 					CALL PrintByteHex(dat(i));
 				END;
@@ -509,6 +531,9 @@ $INCLUDE(..\libs\lib.inc)
 							SHR(DOUBLE(DOUBLE(disp(2))), 16);
 
 						CALL PrintDwordHex(tdisp);
+						CALL dos_std_string_out(@(' ($'));
+						CALL PrintDword(tdisp);
+						CALL dos_std_out(')');
 						i = i + SIZE(tdisp);
 					END;
 				END;
@@ -656,14 +681,15 @@ $INCLUDE(..\libs\lib.inc)
 					i = i + 1;
 					len = len - i;
 				END; ELSE DO;
-					DECLARE fixup BASED pbody STRUCTURE(locat WORD, fixupp (1)byte);
+					DECLARE fixup BASED pbody STRUCTURE(locat WORD, fixupp (1)BYTE);
 					DECLARE (m, s, loc) BYTE, (_, offt) WORD;
 					DECLARE (mtitle, stitle, loctitle) POINTER;
+					DECLARE siz WORD;
 
 					CALL dos_std_string_out(@(9, '- FIXUP field:', 13, 10, '$'));
 					CALL dos_std_string_out(@(9, 9, '- LOCAT:', 13, 10, '$'));
 
-					m = SHR(fixup.locat, 14) AND 01B;
+					m = SHR(fixup.locat, 6) AND 01B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Fixup mode: $'));
 					DO CASE m;
 						mtitle = @('self-relative$');
@@ -671,7 +697,7 @@ $INCLUDE(..\libs\lib.inc)
 					END;
 					CALL dos_std_string_out(mtitle); CALL Println;
 
-					s = SHR(fixup.locat, 13) AND 01B;
+					s = SHR(fixup.locat, 5) AND 01B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Fixup length is specified by: $'));
 					DO CASE s;
 						stitle = @('unsigned 16-bit$');
@@ -679,7 +705,7 @@ $INCLUDE(..\libs\lib.inc)
 					END;
 					CALL dos_std_string_out(stitle); CALL Println;
 
-					loc = SHR(fixup.locat, 10) AND 0111B;
+					loc = SHR(fixup.locat, 2) AND 0111B;
 					CALL dos_std_string_out(@(9, 9, 9, '- Byte(s) to be fixed are a $'));
 					CALL ASSERT(loc <= 4);
 					DO CASE loc;
@@ -691,12 +717,13 @@ $INCLUDE(..\libs\lib.inc)
 					END;
 					CALL dos_std_string_out(loctitle); CALL Println;
 
-					offt = fixup.locat AND 01111111111B;
+					offt = (SHL(fixup.locat, 10) AND 01100000000B) OR (SHR(fixup.locat, 8));
 					CALL dos_std_string_out(@(9, 9, 9, '- Data record offset: $'));
 					CALL PrintWordHex(offt); CALL Println;
 
-					_ = PrintFixupRecord(@fixup.fixupp, s);
-					CALL TODO(@('Print FIXUP$'));
+					siz = PrintFixupRecord(@fixup.fixupp, s);
+					i = i + SIZE(fixup.locat) + siz;
+					len = len - SIZE(fixup.locat) - siz;
 				END;
 			END;
 		END PrintFIXUPP;
@@ -769,7 +796,7 @@ $INCLUDE(..\libs\lib.inc)
 			CALL dos_std_string_out(@(9, 9, '- Module type: $'));
 			DO CASE typ;
 				typtitle = @('absolute module$');
-				typtitle = @('reloc module; non-base fixups may still be present$');
+				typtitle = @('relocatable module; non-base fixups may still be present$');
 				typtitle = @('PIC module; no fixups needed$');
 				typtitle = @('LTL module; maybe base fixups are needed$');
 			END;

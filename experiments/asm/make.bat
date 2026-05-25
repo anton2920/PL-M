@@ -2,9 +2,10 @@
 
 SET INST=C:\Intel
 SET TPATH=%PATH%
-SET PATH=%PATH%;%INST%;%INST%\Sample
+SET PATH=%PATH%;%INST%;%INST%\Sample;C:\MASM\BIN;C:\MASM\BINB
 
-ASM86 main.asm LIST
+REM ASM86 main.asm LIST
+MASM main.asm
 IF ERRORLEVEL 1 GOTO STOP
 
 REM LINK86 main.obj TO main.exe EXE
