@@ -1,3 +1,0 @@
-spath = .\,.c,.lst
-load example.86
-go til main
