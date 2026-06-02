@@ -4,7 +4,7 @@
  */
 
 main: DO;
-$INCLUDE('..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Intel\doslibs.inc')
 $INCLUDE(..\libs\lib.inc)
 	DECLARE BOOL  LITERALLY 'BYTE';
 	DECLARE false LITERALLY '00H';

@@ -1,9 +1,5 @@
 @echo off
 
-set INST=C:\Intel
-set TPATH=%PATH%
-set PATH=%PATH%;%INST%;%INST%\Sample;%INST%\IC86
-
 REM PLM86 main.plm TYPE DEBUG LIST CODE XREF OPTIMIZE(0)
 PLM86 main.plm NOTYPE NOLIST CODE OPTIMIZE(3)
 IF errorlevel = 1 GOTO STOP
@@ -23,6 +19,3 @@ IF errorlevel = 1 GOTO STOP
 main
 
 :STOP
-set PATH=%TPATH%
-set TPATH=
-set INST=

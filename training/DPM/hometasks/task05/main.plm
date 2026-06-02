@@ -1,5 +1,5 @@
 main: DO;
-$INCLUDE('..\..\..\..\Intel\Sample\doslibs.inc')
+$INCLUDE('C:\Intel\doslibs.inc')
 $INCLUDE('..\..\..\..\home\libs\lib.inc')
 	DECLARE pts(2) STRUCTURE (x REAL, y REAL);
 	DECLARE eps REAL DATA(1.e-6);
