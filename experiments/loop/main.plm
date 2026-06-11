@@ -7,7 +7,7 @@ $INCLUDE('..\..\home\libs\lib.inc')
 		y = 4. * x + 1.;
 		RETURN y;
 	END A;
-	
+
 	B: PROCEDURE(x, py) REAL;
 		DECLARE x REAL, py POINTER;
 		DECLARE y BASED py REAL;
