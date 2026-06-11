@@ -1,12 +1,6 @@
 main: DO;
 $INCLUDE('C:\Intel\doslibs.inc')
 $INCLUDE('..\..\home\libs\lib.inc')
-	Min: PROCEDURE(a, b) WORD;
-		DECLARE (a, b) WORD;
-		IF a < b THEN RETURN a;
-		ELSE RETURN b;
-	END Min;
-
 	DECLARE s1(*) BYTE INITIAL('The quick brown fox jumps over a lazy dog!$');
 	DECLARE s2(100) BYTE;
 	DECLARE (i, res) WORD;
