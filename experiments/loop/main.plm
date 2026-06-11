@@ -1,0 +1,58 @@
+main: DO;
+$INCLUDE('C:\Intel\doslibs.inc')
+$INCLUDE('..\..\home\libs\lib.inc')
+	A: PROCEDURE(x, py) REAL;
+		DECLARE x REAL, py POINTER;
+		DECLARE y BASED py REAL;
+		y = 4. * x + 1.;
+		RETURN y;
+	END A;
+	
+	B: PROCEDURE(x, py) REAL;
+		DECLARE x REAL, py POINTER;
+		DECLARE y BASED py REAL;
+		y = 5. * x;
+		RETURN y;
+	END B;
+
+	C: PROCEDURE(x, py) REAL;
+		DECLARE x REAL, py POINTER;
+		DECLARE y BASED py REAL;
+		y = x;
+		RETURN y;
+	END C;
+
+	DECLARE TRUE LITERALLY 'NOT 0';
+	DECLARE f WORD, fp (3)WORD;
+	DECLARE (x, y) REAL;
+	DECLARE i WORD;
+
+	fp(0) = .A;
+	fp(1) = .B;
+	fp(2) = .C;
+
+	CALL InitRealMathUnit;
+	CALL SetRealMode(0FFFH);
+
+	DO WHILE TRUE;
+		CALL dos_std_string_out(@('Type x (zero to exit): $'));
+		x = ReadReal;
+		IF ABS(x) < 1.E-6 THEN GO TO STOP;
+
+		IF      x < -1.  THEN i = 0;
+		ELSE IF x <= 10. THEN i = 1;
+		ELSE                  i = 2;
+
+		f = fp(i);
+		CALL f(x, @y);
+
+		CALL dos_std_string_out(@('f($'));
+		CALL PrintReal(x);
+		CALL dos_std_string_out(@(') = $'));
+		CALL PrintReal(y);
+		CALL Println;
+	END;
+
+STOP:
+	CALL dos_exit(0);
+END main;
